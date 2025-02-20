@@ -233,6 +233,7 @@
 
     <script>
         let colorUpdated = false;
+        let selectedColor = { r: 0, g: 255, b: 255 }; // 初期色
 
         // 鉛筆アイコンを押すと、nameボタンを表示
         document.querySelector('.pencil-icon').addEventListener('click', function() {
@@ -253,29 +254,29 @@
             const color = `rgb(${r}, ${g}, ${b})`;
             document.querySelector('.color-box').style.backgroundColor = color;
 
-            colorUpdated = true; // 色が更新されたことを記録
+            selectedColor = { r, g, b }; // カラーピッカーで選んだ色を保存
+            colorUpdated = true;
         }
 
         // 色変更ボタンがクリックされたとき
         document.querySelector('.ok').addEventListener('click', function() {
-            updateColor();
+            // カラーピッカーを閉じる
+            document.getElementById('color-picker').style.display = 'none';
+
+            // カラーピッカーの色を適用
+            if (colorUpdated) {
+                document.querySelectorAll('li').forEach(function(li) {
+                    const checkbox = li.querySelector('input[type="checkbox"]');
+                    if (checkbox.checked) {
+                        li.style.color = `rgb(${selectedColor.r}, ${selectedColor.g}, ${selectedColor.b})`;
+                    }
+                });
+            }
         });
 
-        document.querySelector('.cancel').addEventListener('click', function() {
-            document.getElementById('color-picker').style.display = 'none'; // カラーピッカーを閉じる
-            colorUpdated = false; // 色の変更がキャンセルされたことを記録
-        });
-
-        // チェックボックスがクリックされたとき
-        document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
-                const listItem = checkbox.closest('li');
-                if (checkbox.checked) {
-                    listItem.classList.add('checked');
-                } else {
-                    listItem.classList.remove('checked');
-                }
-            });
+        // 色変更をリアルタイムで反映
+        document.querySelectorAll('#red, #green, #blue').forEach(function(input) {
+            input.addEventListener('input', updateColor);
         });
 
         // 説明表示
@@ -294,6 +295,23 @@
                 }, { once: true });
 
                 event.stopPropagation(); // クリックイベントの伝播を防ぐ
+            });
+        });
+
+        // チェックボックスがクリックされたとき
+        document.querySelectorAll('input[type="checkbox"]').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                const listItem = checkbox.closest('li');
+                if (checkbox.checked) {
+                    listItem.classList.add('checked');
+                    // チェックされたときにカラーピッカーの色を適用
+                    if (colorUpdated) {
+                        listItem.style.color = `rgb(${selectedColor.r}, ${selectedColor.g}, ${selectedColor.b})`;
+                    }
+                } else {
+                    listItem.classList.remove('checked');
+                    listItem.style.color = ''; // チェックが外れたときは色をリセット
+                }
             });
         });
     </script>
